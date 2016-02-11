@@ -65,6 +65,9 @@ class Proxy::Dynflow
         # closing opened file descriptors)
         # TODO: extend smart proxy to enable hooks that happen after
         # the forking
+
+        authorize_with_ssl_client
+
         Proxy::Dynflow.ensure_initialized
         set :world, Proxy::Dynflow.world
       end
