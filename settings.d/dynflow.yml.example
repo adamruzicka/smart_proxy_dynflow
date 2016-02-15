@@ -1,3 +1,5 @@
 ---
 :enabled: true
 :database: /var/lib/foreman-proxy/dynflow/dynflow.sqlite
+:dynflow_console_authorize_with_ssl_client: false
+:dynflow_console_authorize_with_trusted_hosts: false
