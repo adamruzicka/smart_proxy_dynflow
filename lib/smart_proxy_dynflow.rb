@@ -67,8 +67,8 @@ class Proxy::Dynflow
         # the forking
         settings = Proxy::Dynflow::Plugin.settings
 
-        authorize_with_trusted_hosts if settings.dynflow_console_authorize_with_trusted_hosts
-        authorize_with_ssl_client if settings.dynflow_console_authorize_with_ssl_client
+        authorize_with_trusted_hosts if settings.console_authorize_with_trusted_hosts
+        authorize_with_ssl_client if settings.console_authorize_with_ssl_client
 
         Proxy::Dynflow.ensure_initialized
         set :world, Proxy::Dynflow.world
