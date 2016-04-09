@@ -1,4 +1,4 @@
 ---
-:enabled: true
 :database: /var/lib/foreman-proxy/dynflow/dynflow.sqlite
-:console_auth: true
+:Host: 127.0.0.1
+:Port: 8001

@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'smart_proxy_dynflow/version'
+require 'smart_proxy_dynflow_core/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "smart_proxy_dynflow"
+  gem.name          = "smart_proxy_dynflow_core"
   gem.version       = Proxy::Dynflow::VERSION
   gem.authors       = ['Ivan Nečas']
   gem.email         = ['inecas@redhat.com']
@@ -30,4 +30,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('dynflow', "~> 0.8.4")
   gem.add_runtime_dependency('sequel')
   gem.add_runtime_dependency('sqlite3')
+  gem.add_runtime_dependency('sinatra', '~> 1.4')
+  gem.add_runtime_dependency('rack')
+  gem.add_runtime_dependency('rest-client')
 end
