@@ -6,7 +6,7 @@ module SmartProxyDynflowCore
       def callback(callback, data)
         payload = { :callback => callback, :data => data }.to_json
         response = RestClient.post callback_uri, payload
-        if response.code != "200"
+        if response.code != 200
           raise "Failed performing callback to smart proxy: #{response.code} #{response.body}"
         end
         response
