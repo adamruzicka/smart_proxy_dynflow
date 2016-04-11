@@ -1,35 +1,7 @@
 #!/usr/bin/env ruby
 require 'dynflow'
 require 'rack'
-require 'smart_proxy_dynflow_core'
+require 'smart_proxy_dynflow_core/launcher'
 require 'yaml'
 
-config_dir = File.join(File.dirname(__FILE__), '..', 'config')
-settings = YAML.load(File.read(File.join(config_dir, 'settings.yml.default')))
-settings.merge!(YAML.load(File.read(File.join(config_dir, 'settings.yml')))) if File.exists? File.join(config_dir, 'settings.yml')
-
-plugins = Dir[File.join(config_dir, 'settings.d', '*.yml')].reduce({}) do |acc, cur|
-  acc.update(File.basename(cur).gsub(/\.yml$/, '') => YAML.load(File.read(cur)))
-end
-
-plugins.each do |name, hash|
-  if hash[:enabled]
-    hash[:requires].each { |req| require req } if hash.key? :requires
-  end
-end
-
-SETTINGS = plugins.merge('smart_proxy_dynflow_core' => settings)
-
-app = Rack::Builder.new do
-  map '/api' do
-    run SmartProxyDynflowCore::Api
-  end
-
-  map '/' do
-    run SmartProxyDynflowCore::Core.web_console
-  end
-end
-
-Rack::Server.new(:app => app,
-                 :Host => settings[:Host],
-                 :Port => settings[:Port]).start
+SmartProxyDynflowCore::Launcher.launch!
