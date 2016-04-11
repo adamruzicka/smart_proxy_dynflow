@@ -24,7 +24,6 @@ module SmartProxyDynflowCore
 
     get "/tasks/count" do
       tasks_count(params['state']).to_json
-      MultiJson.dump SETTINGS
     end
   end
 end

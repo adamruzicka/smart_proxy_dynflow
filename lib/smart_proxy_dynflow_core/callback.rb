@@ -19,7 +19,7 @@ module SmartProxyDynflowCore
       private
 
       def callback_uri
-        SETTINGS['smart_proxy_remote_execution_ssh_core'].fetch(:callback_url) +
+        SETTINGS['smart_proxy_dynflow_core'].fetch(:callback_url) +
           '/dynflow/tasks/callback'
       end
     end

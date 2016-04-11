@@ -14,11 +14,11 @@ end
 
 plugins.each do |name, hash|
   if hash[:enabled]
-    hash[:requires].each { |req| require req }
+    hash[:requires].each { |req| require req } if hash.key? :requires
   end
 end
 
-SETTINGS = plugins.merge(:main => settings)
+SETTINGS = plugins.merge('smart_proxy_dynflow_core' => settings)
 
 app = Rack::Builder.new do
   map '/api' do
@@ -32,5 +32,4 @@ end
 
 Rack::Server.new(:app => app,
                  :Host => settings[:Host],
-                 :Port => settings[:Port]
-).start
+                 :Port => settings[:Port]).start

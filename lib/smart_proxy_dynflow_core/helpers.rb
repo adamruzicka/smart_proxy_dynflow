@@ -18,7 +18,7 @@ module SmartProxyDynflowCore
     def task_status(task_id)
       ep = world.persistence.load_execution_plan(task_id)
       ep.to_hash.merge(:actions => ep.actions.map(&:to_hash))
-    rescue KeyError => e
+    rescue KeyError => _e
       status 404
       {}
     end
