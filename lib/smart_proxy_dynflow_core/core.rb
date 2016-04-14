@@ -62,6 +62,11 @@ module SmartProxyDynflowCore
           # closing opened file descriptors)
           # TODO: extend smart proxy to enable hooks that happen after
           # the forking
+          helpers ::SmartProxyDynflowCore::Helpers
+
+          before do
+            authorize_with_ssl_client
+          end
 
           SmartProxyDynflowCore::Core.ensure_initialized
           set :world, SmartProxyDynflowCore::Core.world
