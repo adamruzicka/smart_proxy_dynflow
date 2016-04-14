@@ -5,7 +5,7 @@ module SmartProxyDynflowCore
     class Request
       def callback(callback, data)
         payload = { :callback => callback, :data => data }.to_json
-        response = RestClient.post callback_uri, payload
+        response = callback_resource.post payload
         if response.code != 200
           raise "Failed performing callback to smart proxy: #{response.code} #{response.body}"
         end
@@ -18,9 +18,27 @@ module SmartProxyDynflowCore
 
       private
 
-      def callback_uri
-        SETTINGS['smart_proxy_dynflow_core'].fetch(:callback_url) +
-          '/dynflow/tasks/callback'
+      def callback_resource
+        @resource ||= RestClient::Resource.new(
+          SETTINGS['smart_proxy_dynflow_core'].fetch(:callback_url) +
+            '/dynflow/tasks/callback',
+          ssl_options
+        )
+      end
+
+      def ssl_options
+        if SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'].fetch(:use_https, false)
+          client_key = File.read SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_private_key)
+          client_cert = File.read SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_certificate)
+          {
+            :ssl_client_cert => OpenSSL::X509::Certificate.new(client_cert),
+            :ssl_client_key  => OpenSSL::PKey::RSA.new(client_key),
+            :ssl_ca_file     => SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_ca_file),
+            :verify_ssl      => OpenSSL::SSL::VERIFY_PEER
+          }
+        else
+          {}
+        end
       end
     end
 

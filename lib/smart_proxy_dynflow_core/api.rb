@@ -6,6 +6,7 @@ module SmartProxyDynflowCore
     helpers ::SmartProxyDynflowCore::Helpers
 
     before do
+      authorize_with_ssl_client
       content_type :json
     end
 

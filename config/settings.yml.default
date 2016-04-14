@@ -1,5 +1,10 @@
 ---
 :database: /var/lib/foreman-proxy/dynflow/dynflow.sqlite
-:callback_url: 'http://127.0.0.1:8000'
+:callback_url: 'https://127.0.0.1:8443'
 :Host: 127.0.0.1
 :Port: 8001
+
+:use_https: true
+:ssl_ca_file: ssl/ca.crt
+:ssl_private_key: ssl/private-key.crt
+:ssl_certificate: ssl/cert.crt

@@ -1,3 +1,5 @@
+require 'webrick/https'
+require 'smart_proxy_dynflow_core/bundler_helper'
 module SmartProxyDynflowCore
   class Launcher
 
@@ -7,16 +9,8 @@ module SmartProxyDynflowCore
 
     def start
       load_settings!
-      rack_settings = if https_enabled?
-        # TODO: Use a logger
-        puts "Using HTTPS"
-        https_app
-      else
-        # TODO: Use a logger
-        puts "Using HTTP"
-        {}
-      end
-      Rack::Server.new((rack_settings || {}).merge(base_settings)).start
+      SmartProxyDynflowCore::Core.ensure_initialized
+      Rack::Server.new(rack_settings).start
     end
 
     def load_settings!
@@ -27,16 +21,25 @@ module SmartProxyDynflowCore
         acc.update(File.basename(cur).gsub(/\.yml$/, '') => YAML.load(File.read(cur)))
       end
 
-      plugins.each do |name, hash|
-        if hash[:enabled]
-          hash[:requires].each { |req| require req } if hash.key? :requires
-        end
-      end
+      BundlerHelper.require_groups(:default)
 
       SmartProxyDynflowCore::SETTINGS.merge!(plugins.merge('smart_proxy_dynflow_core' => settings))
     end
 
     private
+
+    def rack_settings
+      settings = if https_enabled?
+                   # TODO: Use a logger
+                   puts "Using HTTPS"
+                   https_app
+                 else
+                   # TODO: Use a logger
+                   puts "Using HTTP"
+                   {}
+                 end
+      settings.merge(base_settings)
+    end
 
     def app
       Rack::Builder.new do
@@ -78,9 +81,7 @@ module SmartProxyDynflowCore
     end
 
     def https_enabled?
-      @https_enabled ||= %w(certificate ca_file private_key).all? do |key|
-        SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'].keys.include? ["ssl_#{key}"]
-      end
+      SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'][:use_https]
     end
 
     def ssl_private_key
