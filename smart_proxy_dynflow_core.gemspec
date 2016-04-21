@@ -5,7 +5,7 @@ require 'smart_proxy_dynflow_core/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "smart_proxy_dynflow_core"
-  gem.version       = Proxy::Dynflow::VERSION
+  gem.version       = SmartProxyDynflowCore::VERSION
   gem.authors       = ['Ivan Nečas']
   gem.email         = ['inecas@redhat.com']
   gem.homepage      = "https://github.com/theforeman/smart_proxy_dynflow"

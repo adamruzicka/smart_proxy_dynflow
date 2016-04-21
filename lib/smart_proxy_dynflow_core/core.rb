@@ -16,7 +16,7 @@ module SmartProxyDynflowCore
       return ENV['DYNFLOW_DB_CONN_STRING'] if ENV.key? 'DYNFLOW_DB_CONN_STRING'
       db_conn_string = 'sqlite:/'
 
-      db_file = SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'][:database]
+      db_file = SETTINGS['smart_proxy_dynflow_core'][:database]
       if db_file.nil? || db_file.empty?
         # TODO: Use some kind of logger
         STDERR.puts "Could not open DB for dynflow at '#{db_file}', will keep data in memory. Restart will drop all dynflow data."
@@ -49,7 +49,7 @@ module SmartProxyDynflowCore
 
       def ensure_initialized
         return @instance if @instance
-        @instance = SmartProxyDynflowCore::Core.new
+        @instance = Core.new
         after_initialize_blocks.each(&:call)
         @instance
       end
@@ -62,14 +62,14 @@ module SmartProxyDynflowCore
           # closing opened file descriptors)
           # TODO: extend smart proxy to enable hooks that happen after
           # the forking
-          helpers ::SmartProxyDynflowCore::Helpers
+          helpers Helpers
 
           before do
             authorize_with_ssl_client
           end
 
-          SmartProxyDynflowCore::Core.ensure_initialized
-          set :world, SmartProxyDynflowCore::Core.world
+          Core.ensure_initialized
+          set :world, Core.world
         end
         dynflow_console
       end

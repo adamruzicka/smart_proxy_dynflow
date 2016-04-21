@@ -3,7 +3,7 @@ require 'multi_json'
 
 module SmartProxyDynflowCore
   class Api < ::Sinatra::Base
-    helpers ::SmartProxyDynflowCore::Helpers
+    helpers Helpers
 
     before do
       authorize_with_ssl_client

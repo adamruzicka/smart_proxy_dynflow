@@ -9,7 +9,7 @@ module SmartProxyDynflowCore
 
     def start
       load_settings!
-      SmartProxyDynflowCore::Core.ensure_initialized
+      Core.ensure_initialized
       Rack::Server.new(rack_settings).start
     end
 
@@ -23,7 +23,7 @@ module SmartProxyDynflowCore
 
       BundlerHelper.require_groups(:default)
 
-      SmartProxyDynflowCore::SETTINGS.merge!(plugins.merge('smart_proxy_dynflow_core' => settings))
+      SETTINGS.merge!(plugins.merge('smart_proxy_dynflow_core' => settings))
     end
 
     private
@@ -44,11 +44,11 @@ module SmartProxyDynflowCore
     def app
       Rack::Builder.new do
         map '/api' do
-          run SmartProxyDynflowCore::Api
+          run Api
         end
 
         map '/' do
-          run SmartProxyDynflowCore::Core.web_console
+          run Core.web_console
         end
       end
     end
@@ -56,8 +56,8 @@ module SmartProxyDynflowCore
     def base_settings
       {
         :app => app,
-        :Host => SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'].fetch(:Host),
-        :Port => SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'].fetch(:Port),
+        :Host => SETTINGS['smart_proxy_dynflow_core'].fetch(:Host),
+        :Port => SETTINGS['smart_proxy_dynflow_core'].fetch(:Port),
         :daemonize => false
       }
     end
@@ -81,7 +81,7 @@ module SmartProxyDynflowCore
     end
 
     def https_enabled?
-      SmartProxyDynflowCore::SETTINGS['smart_proxy_dynflow_core'][:use_https]
+      SETTINGS['smart_proxy_dynflow_core'][:use_https]
     end
 
     def ssl_private_key
