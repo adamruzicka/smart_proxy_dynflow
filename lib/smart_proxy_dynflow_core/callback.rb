@@ -20,20 +20,19 @@ module SmartProxyDynflowCore
 
       def callback_resource
         @resource ||= RestClient::Resource.new(
-          SETTINGS['smart_proxy_dynflow_core'].fetch(:callback_url) +
-            '/dynflow/tasks/callback',
+          Settings.instance.callback_url + '/dynflow/tasks/callback',
           ssl_options
         )
       end
 
       def ssl_options
-        return {} unless SETTINGS['smart_proxy_dynflow_core'].fetch(:use_https, false)
-        client_key = File.read SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_private_key)
-        client_cert = File.read SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_certificate)
+        return {} unless Settings.instance.use_https
+        client_key = File.read  Settings.instance.ssl_private_key
+        client_cert = File.read Settings.instance.ssl_certificate
         {
           :ssl_client_cert => OpenSSL::X509::Certificate.new(client_cert),
           :ssl_client_key  => OpenSSL::PKey::RSA.new(client_key),
-          :ssl_ca_file     => SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_ca_file),
+          :ssl_ca_file     => Settings.instance.ssl_ca_file,
           :verify_ssl      => OpenSSL::SSL::VERIFY_PEER
         }
       end

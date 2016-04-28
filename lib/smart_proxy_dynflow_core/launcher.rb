@@ -1,5 +1,6 @@
 require 'webrick/https'
 require 'smart_proxy_dynflow_core/bundler_helper'
+require 'smart_proxy_dynflow_core/settings'
 module SmartProxyDynflowCore
   class Launcher
 
@@ -9,21 +10,18 @@ module SmartProxyDynflowCore
 
     def start
       load_settings!
+      Settings.instance.standalone = true
       Core.ensure_initialized
       Rack::Server.new(rack_settings).start
     end
 
     def load_settings!
       config_dir = File.join(File.dirname(__FILE__), '..', '..', 'config')
-      settings = YAML.load(File.read(File.join(config_dir, 'settings.yml.default')))
-      settings.merge!(YAML.load(File.read(File.join(config_dir, 'settings.yml')))) if File.exists? File.join(config_dir, 'settings.yml')
-      plugins = Dir[File.join(config_dir, 'settings.d', '*.yml')].reduce({}) do |acc, cur|
-        acc.update(File.basename(cur).gsub(/\.yml$/, '') => YAML.load(File.read(cur)))
-      end
+      Settings.load_global_settings(File.join(config_dir, 'settings.yml'))
 
       BundlerHelper.require_groups(:default)
 
-      SETTINGS.merge!(plugins.merge('smart_proxy_dynflow_core' => settings))
+      Dir[File.join(config_dir, 'settings.d', '*.yml')].each { |path| Settings.load_plugin_settings(path) }
     end
 
     private
@@ -56,8 +54,8 @@ module SmartProxyDynflowCore
     def base_settings
       {
         :app => app,
-        :Host => SETTINGS['smart_proxy_dynflow_core'].fetch(:Host),
-        :Port => SETTINGS['smart_proxy_dynflow_core'].fetch(:Port),
+        :Host => Settings.instance.Host,
+        :Port => Settings.instance.Port,
         :daemonize => false
       }
     end
@@ -75,17 +73,17 @@ module SmartProxyDynflowCore
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
         :SSLPrivateKey => ssl_private_key,
         :SSLCertificate => ssl_certificate,
-        :SSLCACertificateFile => SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_ca_file),
+        :SSLCACertificateFile => Settings.instance.ssl_ca_file,
         :SSLOptions => ssl_options
       }
     end
 
     def https_enabled?
-      SETTINGS['smart_proxy_dynflow_core'][:use_https]
+      Settings.instance.use_https
     end
 
     def ssl_private_key
-      OpenSSL::PKey::RSA.new(File.read(SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_private_key)))
+      OpenSSL::PKey::RSA.new(File.read(Settings.instance.ssl_private_key))
     rescue Exception => e
       # TODO: Use a logger
       STDERR.puts "Unable to load private SSL key. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
@@ -94,7 +92,7 @@ module SmartProxyDynflowCore
     end
 
     def ssl_certificate
-      OpenSSL::X509::Certificate.new(File.read(SETTINGS['smart_proxy_dynflow_core'].fetch(:ssl_certificate)))
+      OpenSSL::X509::Certificate.new(File.read(Settings.instance.ssl_certificate))
     rescue Exception => e
       # TODO: Use a logger
       STDERR.puts "Unable to load SSL certificate. Are the values correct in settings.yml and do permissions allow reading?: #{e}"

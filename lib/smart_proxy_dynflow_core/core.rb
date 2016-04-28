@@ -16,7 +16,7 @@ module SmartProxyDynflowCore
       return ENV['DYNFLOW_DB_CONN_STRING'] if ENV.key? 'DYNFLOW_DB_CONN_STRING'
       db_conn_string = 'sqlite:/'
 
-      db_file = SETTINGS['smart_proxy_dynflow_core'][:database]
+      db_file = Settings.instance.database
       if db_file.nil? || db_file.empty?
         # TODO: Use some kind of logger
         STDERR.puts "Could not open DB for dynflow at '#{db_file}', will keep data in memory. Restart will drop all dynflow data."
@@ -57,7 +57,7 @@ module SmartProxyDynflowCore
       def web_console
         require 'dynflow/web'
         dynflow_console = ::Dynflow::Web.setup do
-          # we can't use the proxy's after_actionvation hook, as
+          # we can't use the proxy's after_activation hook, as
           # it happens before the Daemon forks the process (including
           # closing opened file descriptors)
           # TODO: extend smart proxy to enable hooks that happen after
