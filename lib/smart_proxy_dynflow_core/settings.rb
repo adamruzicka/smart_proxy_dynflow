@@ -42,6 +42,7 @@ module SmartProxyDynflowCore
       [:database, :core_url, :console_auth].each do |key|
         SETTINGS[key] = plugin.settings[key]
       end
+      SETTINGS.plugins.values.each { |plugin| plugin.load_settings_from_proxy }
     end
 
     def self.load_plugin_settings(path)
