@@ -24,6 +24,16 @@ module SmartProxyDynflowCore
       Dir[File.join(config_dir, 'settings.d', '*.yml')].each { |path| Settings.load_plugin_settings(path) }
     end
 
+    def self.route_mapping(rack_builder)
+      rack_builder.map '/console' do
+        run Core.web_console
+      end
+
+      rack_builder.map '/' do
+        run Api
+      end
+    end
+
     private
 
     def rack_settings
@@ -41,13 +51,7 @@ module SmartProxyDynflowCore
 
     def app
       Rack::Builder.new do
-        map '/api' do
-          run Api
-        end
-
-        map '/' do
-          run Core.web_console
-        end
+        SmartProxyDynflowCore::Launcher.route_mapping(self)
       end
     end
 

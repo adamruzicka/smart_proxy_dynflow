@@ -1,10 +1,15 @@
 require 'rest-client'
+require 'dynflow'
+
+begin
+  require 'smart_proxy_dynflow/callback'
+rescue LoadError
+end
 
 module SmartProxyDynflowCore
   module Callback
     class Request
-      def callback(callback, data)
-        payload = { :callback => callback, :data => data }.to_json
+      def callback(payload)
         response = callback_resource.post payload
         if response.code != 200
           raise "Failed performing callback to smart proxy: #{response.code} #{response.body}"
@@ -13,16 +18,18 @@ module SmartProxyDynflowCore
       end
 
       def self.callback(callback, data)
-        self.new.callback(callback, data)
+        self.new.callback(self.prepare_payload(callback, data))
       end
 
       private
 
+      def self.prepare_payload(callback, data)
+        { :callback => callback, :data => data }.to_json
+      end
+
       def callback_resource
-        @resource ||= RestClient::Resource.new(
-          Settings.instance.callback_url + '/dynflow/tasks/callback',
-          ssl_options
-        )
+        @resource ||= RestClient::Resource.new Settings.instance.callback_url + '/dynflow/tasks/callback',
+                                               ssl_options
       end
 
       def ssl_options
@@ -44,7 +51,8 @@ module SmartProxyDynflowCore
       end
 
       def run
-        Callback::Request.callback(input[:callback], input[:data])
+        callback = (Settings.instance.standalone ? Callback::Request : Proxy::Dynflow::Callback::Request).new
+        callback.callback(SmartProxyDynflowCore::Callback::Request.prepare_payload(input[:callback], input[:data]))
       end
     end
 

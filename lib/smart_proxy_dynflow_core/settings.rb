@@ -6,6 +6,8 @@ module SmartProxyDynflowCore
     DEFAULT_SETTINGS = {
         :database => '/var/lib/foreman-proxy/dynflow/dynflow.sqlite',
         :callback_url => 'https://127.0.0.1:8443',
+        :console_auth => true,
+        :foreman_url => 'http://127.0.0.1:3000',
         :Host => '127.0.0.1',
         :Port => '8008',
         :use_https => false,
@@ -29,6 +31,16 @@ module SmartProxyDynflowCore
         YAML.load(File.read(path)).each do |key, value|
           SETTINGS[key] = value
         end
+      end
+    end
+
+    def self.load_from_proxy(plugin)
+      [:ssl_certificate, :ssl_ca_file, :ssl_private_key, :foreman_url].each do |key|
+        SETTINGS[key] = Proxy::SETTINGS[key]
+      end
+      SETTINGS.callback_url = SETTINGS.foreman_url
+      [:database, :core_url, :console_auth].each do |key|
+        SETTINGS[key] = plugin.settings[key]
       end
     end
 
