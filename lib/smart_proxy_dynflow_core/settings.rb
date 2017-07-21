@@ -40,8 +40,7 @@ module SmartProxyDynflowCore
         :plugins => {},
         :pid_file => '/var/run/foreman-proxy/smart_proxy_dynflow_core.pid',
         :daemonize => false,
-        :loaded => false,
-        :tokens => []
+        :loaded => false
     }
 
     PROXY_SETTINGS = [:ssl_ca_file, :ssl_certificate, :ssl_private_key, :foreman_url,
