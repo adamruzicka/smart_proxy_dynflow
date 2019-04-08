@@ -47,7 +47,7 @@ module SmartProxyDynflowCore
 
     def install_usr1_trap
       trap(:USR1) do
-        Log.instance.roll_log
+        Log.reopen
       end
     end
 
@@ -83,7 +83,6 @@ module SmartProxyDynflowCore
       }
     end
 
-    # rubocop:disable Metrics/PerceivedComplexity
     def https_app
       ssl_options  = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
       ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)

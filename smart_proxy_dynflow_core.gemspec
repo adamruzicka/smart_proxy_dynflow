@@ -2,7 +2,6 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'smart_proxy_dynflow_core/version'
 
-# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |gem|
   gem.name          = "smart_proxy_dynflow_core"
   gem.version       = SmartProxyDynflowCore::VERSION
@@ -31,6 +30,7 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency('dynflow', "~> 1.1")
   gem.add_runtime_dependency('foreman-tasks-core', '>= 0.1.7')
+  gem.add_runtime_dependency('logging')
   gem.add_runtime_dependency('rack')
   gem.add_runtime_dependency('rest-client')
   gem.add_runtime_dependency('sequel')

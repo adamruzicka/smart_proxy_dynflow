@@ -7,7 +7,6 @@ CIPHERS = ['ECDHE-RSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES256-GCM-SHA384',
 
 module WEBrick
   class GenericServer
-    # rubocop:disable Metrics/AbcSize
     def setup_ssl_context(config) # :nodoc:
       unless config[:SSLCertificate]
         cn = config[:SSLCertName]
