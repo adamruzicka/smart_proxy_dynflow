@@ -39,9 +39,9 @@ module Actions
       end
 
       def restore_current_request_id
-        if (restored_id = action.input[:current_request_id]).present?
+        unless (restored_id = action.input[:current_request_id]).nil?
           old_id = ::Logging.mdc['request']
-          if old_id.present? && old_id != restored_id
+          if !old_id.nil? && old_id != restored_id
             action.action_logger.warn(_('Changing request id %{request_id} to saved id %{saved_id}') % { :saved_id => restored_id, :request_id => old_id })
           end
           ::Logging.mdc['request'] = restored_id
@@ -52,7 +52,7 @@ module Actions
         # Otherwise, keep the id until it's cleaned in  Dynflow's run_user_code block
         # so that it will stay valid for the rest of the processing of the current step
         # (even outside of the middleware lifecycle)
-        ::Logging.mdc['request'] = old_id if old_id.present?
+        ::Logging.mdc['request'] = old_id unless old_id.nil?
       end
     end
   end
