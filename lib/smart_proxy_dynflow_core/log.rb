@@ -98,7 +98,7 @@ module SmartProxyDynflowCore
 
     class ProxyStructuredFormater < ::Dynflow::LoggerAdapters::Formatters::Abstract
       def format(message)
-        if message.is_a(Exception)
+        if message.is_a?(Exception)
           subject = "#{message.message} (#{message.class})"
           if @base.respond_to?(:exception)
             @base.exception("Error details", message)
