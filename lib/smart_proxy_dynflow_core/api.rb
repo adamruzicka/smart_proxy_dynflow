@@ -60,6 +60,14 @@ module SmartProxyDynflowCore
       tasks_count(params['state']).to_json
     end
 
+    get "/tasks/store/:task_id/:step_id/:file" do |task_id, step_id, file|
+      content = SmartProxyDynflowCore::Memstore.instance.get(task_id, step_id, file)
+      return content if content
+
+      status 404
+      ""
+    end
+
     # capturing post "/tasks/:task_id/(update|done)"
     post TASK_UPDATE_REGEXP_PATH do |task_id, _action|
       data = MultiJson.load(request.body.read)
