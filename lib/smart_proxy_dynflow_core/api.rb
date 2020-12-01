@@ -84,7 +84,8 @@ module SmartProxyDynflowCore
     private
 
     def callback_host(params, request)
-      params.fetch('action_input', {})['proxy_url'] ||
+      params['proxy_url'] ||
+        params.fetch('action_input', {})['proxy_url'] ||
         request.env.values_at('HTTP_X_FORWARDED_FOR', 'HTTP_HOST').compact.first
     end
 
