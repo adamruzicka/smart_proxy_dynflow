@@ -19,6 +19,9 @@ module SmartProxyDynflowCore
         task_id = match[1]
         action = match[2]
         authorize_with_token(task_id: task_id, clear: action == 'done')
+      elsif request.path_info.start_with?('/tasks/store/')
+        task_id = request.path_info.split('/')[3]
+        authorize_with_token(task_id: task_id, clear: false)
       else
         authorize_with_ssl_client
       end
