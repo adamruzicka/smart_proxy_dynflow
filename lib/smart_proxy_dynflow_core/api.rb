@@ -1,10 +1,19 @@
 require 'sinatra/base'
 require 'multi_json'
 
+begin
+  require 'proxy/log'
+  require 'proxy/helpers'
+  require 'sinatra/authorization'
+rescue LoadError
+end
+
 module SmartProxyDynflowCore
   class Api < ::Sinatra::Base
     TASK_UPDATE_REGEXP_PATH = %r{/tasks/(\S+)/(update|done)}
     helpers Helpers
+
+    include ::Sinatra::Authorization::Helpers unless Settings.instance.standalone
 
     configure do
       if Settings.instance.standalone
@@ -19,8 +28,11 @@ module SmartProxyDynflowCore
         task_id = match[1]
         action = match[2]
         authorize_with_token(task_id: task_id, clear: action == 'done')
-      else
+      elsif Settings.instance.standalone
         authorize_with_ssl_client
+      else
+        do_authorize_with_ssl_client
+        do_authorize_with_trusted_hosts
       end
       content_type :json
     end
