@@ -19,7 +19,9 @@ module Proxy::Dynflow
       require 'smart_proxy_dynflow/otp_manager'
       require 'smart_proxy_dynflow/action'
       require 'smart_proxy_dynflow/task_launcher'
+      require 'smart_proxy_dynflow/memory_store'
 
+      Proxy::Dynflow::MemoryStore.instance # Force initialization
       Proxy::Dynflow::Core.ensure_initialized
     end
   end

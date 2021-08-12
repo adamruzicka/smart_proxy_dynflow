@@ -18,6 +18,9 @@ module Proxy
           task_id = match[1]
           action = match[2]
           authorize_with_token(task_id: task_id, clear: action == 'done')
+        elsif request.path_info.start_with?('/tasks/store/')
+          task_id = request.path_info.split('/')[3]
+          authorize_with_token(task_id: task_id, clear: false)
         else
           do_authorize_any
         end
@@ -59,6 +62,14 @@ module Proxy
         tasks_count(params['state']).to_json
       end
 
+      get "/tasks/store/:task_id/:step_id/:file" do |task_id, step_id, file|
+        content = Proxy::Dynflow::MemoryStore.instance.get(task_id, step_id.to_i, file)
+        return content if content
+
+        status 404
+        ""
+      end
+
       # capturing post "/tasks/:task_id/(update|done)"
       post TASK_UPDATE_REGEXP_PATH do |task_id, _action|
         data = MultiJson.load(request.body.read)
@@ -72,7 +83,8 @@ module Proxy
       private
 
       def callback_host(params, request)
-        params.fetch('action_input', {})['proxy_url'] ||
+        params['proxy_url'] ||
+          params.fetch('action_input', {})['proxy_url'] ||
           request.env.values_at('HTTP_X_FORWARDED_FOR', 'HTTP_HOST').compact.first
       end
 

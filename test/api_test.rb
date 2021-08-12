@@ -2,6 +2,7 @@ require 'test_helper'
 require 'json'
 require 'smart_proxy_dynflow/api.rb'
 require 'smart_proxy_dynflow/runner/update'
+require 'smart_proxy_dynflow/memory_store'
 
 module SmartProxyDynflowCore
   class ApiTest < Minitest::Spec
@@ -140,6 +141,28 @@ module SmartProxyDynflowCore
         get '/tasks/operations', request_headers
         response = JSON.parse(last_response.body)
         _(response).must_equal %w[foo bar baz]
+      end
+    end
+
+    describe 'GET /tasks/store' do
+      before { Proxy::Dynflow::MemoryStore.instance.add('12345', 1, 'message', 'hello') }
+      after  { Proxy::Dynflow::MemoryStore.instance.drop('12345') }
+
+      it 'returns content if there is some' do
+        get '/tasks/store/12345/1/message'
+        _(last_response.status).must_equal 200
+        _(last_response.body).must_equal 'hello'
+      end
+
+      it 'returns 404 if there is no content' do
+        get '/tasks/store/12345/1/something.tar.gz'
+        _(last_response.status).must_equal 404
+
+        get '/tasks/store/12345/2/something.tar.gz'
+        _(last_response.status).must_equal 404
+
+        get '/tasks/store/12346/2/something.tar.gz'
+        _(last_response.status).must_equal 404
       end
     end
   end
