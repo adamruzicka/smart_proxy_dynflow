@@ -9,6 +9,8 @@ on:
 jobs:
   rubocop:
     runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: bmc:development:dhcp_isc:journald:krb5:libvirt:puppetca_token_whitelisting:real_freeipa:windows
     steps:
       - uses: actions/checkout@v2
       - name: Setup Ruby
