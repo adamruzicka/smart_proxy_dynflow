@@ -12,9 +12,11 @@ module Proxy::Dynflow
       def generate_updates
         base = {}
         base[@suspended_action] = Runner::Update.new(Proxy::Dynflow::ContinuousOutput.new, @exit_status) if @exit_status
+        @update_trackers.each_key(&:increase!)
         # Operate on all hosts if the main process ended or only on hosts for which we have updates
-        @outputs.reject { |_, output| @exit_status.nil? && output.empty? }
+        @outputs.select { |key, output| @update_trackers[key].ready?(@exit_status, output) }
                 .reduce(base) do |acc, (identifier, output)|
+                  @update_trackers[identifier] = UpdateTracker.new
                   @outputs[identifier] = Proxy::Dynflow::ContinuousOutput.new # Create a new ContinuousOutput for next round of updates
                   exit_status = @exit_statuses[identifier] || @exit_status if @exit_status
                   acc.merge(host_action(identifier) => Runner::Update.new(output, exit_status))
@@ -24,6 +26,9 @@ module Proxy::Dynflow
       def initialize_continuous_outputs
         @outputs = @targets.keys.reduce({}) do |acc, target|
           acc.merge(target => Proxy::Dynflow::ContinuousOutput.new)
+        end
+        @update_trackers = @targets.keys.reduce({}) do |acc, target|
+          acc.merge(target => UpdateTracker.new)
         end
       end
 

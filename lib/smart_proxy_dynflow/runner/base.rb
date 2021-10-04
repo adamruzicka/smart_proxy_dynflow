@@ -2,6 +2,22 @@ module Proxy::Dynflow
   module Runner
     # Runner is an object that is able to initiate some action and
     # provide update data on refresh call.
+    class UpdateTracker
+      def initialize
+        @counter = 0
+      end
+
+      def ready?(exit_status, output)
+        exit_status ||
+          ::Proxy::Dynflow::Plugin.settings.event_batch_max_age < @counter ||
+          ::Proxy::Dynflow::Plugin.settings.event_batch_max_size < output.size
+      end
+
+      def increase!
+        @counter += 1
+      end
+    end
+
     class Base
       attr_reader :id
       attr_writer :logger
@@ -76,9 +92,10 @@ module Proxy::Dynflow
       end
 
       def generate_updates
-        return no_update if @continuous_output.empty? && @exit_status.nil?
+        @update_tracker.increase!
+        return no_update unless @update_tracker.ready?(@exit_status, @continuous_output)
         new_data = @continuous_output
-        @continuous_output = Proxy::Dynflow::ContinuousOutput.new
+        initialize_continuous_outputs
         new_update(new_data, @exit_status)
       end
 
@@ -92,6 +109,7 @@ module Proxy::Dynflow
 
       def initialize_continuous_outputs
         @continuous_output = ::Proxy::Dynflow::ContinuousOutput.new
+        @update_tracker = UpdateTracker.new
       end
     end
   end

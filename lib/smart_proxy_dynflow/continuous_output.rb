@@ -15,6 +15,10 @@ module Proxy::Dynflow
       @raw_outputs << raw_output
     end
 
+    def size
+      @raw_outputs.size
+    end
+
     def empty?
       @raw_outputs.empty?
     end

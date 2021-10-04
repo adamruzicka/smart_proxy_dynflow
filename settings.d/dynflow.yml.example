@@ -8,3 +8,12 @@
 # Maximum age of execution plans to keep before having them cleaned
 # by the execution plan cleaner (in seconds), defaults to 24 hours
 # :execution_plan_cleaner_age: 86400
+
+# When running things through runners, up to event_batch_max_size
+# updates will be accumulated before sending a batched upate event
+# to the runner's action
+# :event_batch_max_size: 15
+
+# Same as event_batch_max_size, but takes into account time since
+# last update instead of size of accumulated updates
+# :event_batch_max_age: 15
