@@ -51,11 +51,17 @@ module Proxy::Dynflow
         config.logger_adapter = logger_adapter
         config.persistence_adapter = persistence_adapter
         config.execution_plan_cleaner = execution_plan_cleaner
+        config.connector = ->(world, _) { connector_class.new(world) }
         # TODO: There has to be a better way
         matchers = config.silent_dead_letter_matchers.call.concat(self.class.silencer_matchers)
         config.silent_dead_letter_matchers = matchers
         yield config if block_given?
       end
+    end
+
+    def connector_class
+      db_file = Settings.instance.database
+      (db_file.nil? || db_file.empty?) ? ::Dynflow::Connectors::Direct : ::Dynflow::Connectors::Database
     end
 
     def logger_adapter
