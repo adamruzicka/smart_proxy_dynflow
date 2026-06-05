@@ -14,6 +14,14 @@ else
   end
 end
 
+begin
+  require 'steep/rake_task'
+rescue LoadError
+  # No Steep
+else
+  Steep::RakeTask.new
+end
+
 desc 'Default: run unit tests.'
 task :default => :test
 

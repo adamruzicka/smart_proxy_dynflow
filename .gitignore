@@ -17,3 +17,5 @@ mkmf.log
 bundler.d/Gemfile.local.rb
 Gemfile.local.rb
 config/settings.*
+/.gem_rbs_collection/
+/rbs_collection.lock.yaml

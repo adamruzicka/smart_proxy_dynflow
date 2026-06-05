@@ -13,6 +13,8 @@ end
 
 group :development do
   gem 'pry'
+  gem 'rbs', require: false
+  gem 'steep', require: false
 end
 
 group :test do
