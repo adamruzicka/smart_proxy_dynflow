@@ -14,6 +14,7 @@ end
 group :development do
   gem 'pry'
   gem 'rbs', require: false
+  gem 'rbs-inline', require: false
   gem 'steep', require: false
 end
 

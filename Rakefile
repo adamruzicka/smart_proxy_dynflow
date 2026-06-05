@@ -16,10 +16,16 @@ end
 
 begin
   require 'steep/rake_task'
+  require 'rbs/inline'
 rescue LoadError
-  # No Steep
+  # No Steep/RBS
 else
+  task :'rbs:inline' do
+    sh 'bundle', 'exec', 'rbs-inline', '--output', 'lib'
+  end
+
   Steep::RakeTask.new
+  task 'steep:check' => :'rbs:inline'
 end
 
 desc 'Default: run unit tests.'

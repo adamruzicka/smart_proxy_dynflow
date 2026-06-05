@@ -19,3 +19,4 @@ Gemfile.local.rb
 config/settings.*
 /.gem_rbs_collection/
 /rbs_collection.lock.yaml
+/sig/generated/
