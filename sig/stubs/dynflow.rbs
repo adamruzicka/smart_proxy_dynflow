@@ -1,0 +1,56 @@
+# Minimal stubs for Dynflow types
+module Dynflow
+  class Action
+    def plan_self: (untyped) -> untyped
+    def plan_action: (*untyped) -> untyped
+    def input: () -> Hash[Symbol, untyped]
+    def output: () -> Hash[Symbol, untyped]
+    def world: () -> untyped
+    def suspended_action: () -> untyped
+    def suspend: () -> void
+    def error!: (String) -> void
+    def action_logger: () -> untyped
+    def stored_output_chunks: () -> Array[Hash[Symbol, untyped]]
+    def output_chunk: (Array[Hash[String, untyped]]) -> void
+    def drop_output_chunks!: () -> void
+
+    module Cancellable
+      class Cancel
+      end
+    end
+
+    module WithSubPlans
+      def sub_plans: () -> Array[untyped]
+    end
+
+    module WithPollingSubPlans
+    end
+
+    module Rescue
+      def self.Fail: () -> untyped
+      def self.Skip: () -> untyped
+    end
+  end
+
+  class Actor
+    def reference: () -> untyped
+    def tell: (untyped) -> void
+  end
+
+  class Middleware
+    def action: () -> untyped
+    def pass: (*untyped) -> untyped
+  end
+
+  module LoggerAdapters
+    class Simple
+      def initialize: (untyped?, Integer, Array[untyped]) -> void
+    end
+
+    module Formatters
+      class Abstract
+        def format: (untyped) -> String
+      end
+    end
+  end
+end

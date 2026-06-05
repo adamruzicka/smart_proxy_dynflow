@@ -1,23 +1,33 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 module Proxy::Dynflow
   module SettingsLoader
+    # @rbs self.@settings_registry: Hash[Array[Symbol], untyped]
+    # @rbs self.@name_to_settings: Hash[Symbol, untyped]
+    # @rbs self.@settings_keys: Array[Symbol]
+
+    #: () -> Hash[Array[Symbol], untyped]
     def self.settings_registry
       @settings_registry ||= {}
     end
 
+    #: () -> Hash[Symbol, untyped]
     def self.name_to_settings
       @name_to_settings ||= {}
     end
 
+    #: () -> Array[Symbol]
     def self.settings_keys
       @settings_keys ||= []
     end
 
+    #: (Symbol) -> bool
     def self.settings_registered?(name)
       name_to_settings.key?(name)
     end
 
+    #: (Symbol | Array[Symbol], untyped) -> void
     def self.register_settings(names, object)
       names = [names] unless names.is_a? Array
       names.each do |name|
@@ -29,28 +39,36 @@ module Proxy::Dynflow
       settings_registry[names] = object
     end
 
+    #: (Symbol, Hash[Symbol, untyped]) -> void
     def self.setup_settings(name, settings)
       raise "Settings for #{name} were not registered" unless settings_registered?(name)
 
       name_to_settings[name].initialize_settings(settings)
     end
 
+    # @rbs @defaults: Hash[Symbol, untyped]
+    # @rbs @settings: Hash[Symbol, untyped]
+
+    #: (Symbol | Array[Symbol], ?Hash[Symbol, untyped]) -> void
     def register_settings(names, defaults = {})
       SettingsLoader.register_settings(names, self)
       @defaults = defaults
     end
 
+    #: (?Hash[Symbol, untyped]) -> void
     def initialize_settings(settings = {})
       @settings = @defaults.merge(settings)
       validate_settings!
     end
 
+    #: () -> Hash[Symbol, untyped]
     def settings
       raise "Settings for #{self} not initalized" unless @settings
 
       @settings
     end
 
+    #: () -> void
     def validate_settings!
       raise 'Only symbols expected in keys' unless @settings.keys.all? { |key| key.is_a? Symbol }
     end

@@ -1,0 +1,12 @@
+# Minimal stubs for Smart Proxy types
+module Proxy
+  class Plugin
+  end
+
+  module HttpRequest
+    class ForemanRequest
+      def request_factory: () -> untyped
+      def send_request: (untyped) -> untyped
+    end
+  end
+end

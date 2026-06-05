@@ -1,33 +1,40 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 module Actions
   module Middleware
     class KeepCurrentRequestID < Dynflow::Middleware
+      #: (*untyped) -> untyped
       def delay(*args)
         pass(*args).tap { store_current_request_id }
       end
 
+      #: (*untyped) -> untyped
       def plan(*args)
         with_current_request_id do
           pass(*args).tap { store_current_request_id }
         end
       end
 
+      #: (*untyped) -> untyped
       def run(*args)
         restore_current_request_id { pass(*args) }
       end
 
+      #: () -> untyped
       def finalize
         restore_current_request_id { pass }
       end
 
       # Run all execution plan lifecycle hooks as the original request_id
+      #: (*untyped) -> untyped
       def hook(*args)
         restore_current_request_id { pass(*args) }
       end
 
       private
 
+      #: () { () -> untyped } -> untyped
       def with_current_request_id(&block)
         if action.input[:current_request_id].nil?
           yield
@@ -36,10 +43,12 @@ module Actions
         end
       end
 
+      #: () -> void
       def store_current_request_id
         action.input[:current_request_id] = ::Logging.mdc['request']
       end
 
+      #: () { () -> untyped } -> untyped
       def restore_current_request_id
         unless (restored_id = action.input[:current_request_id]).nil?
           old_id = ::Logging.mdc['request']

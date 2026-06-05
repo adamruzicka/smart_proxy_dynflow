@@ -1,18 +1,15 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 require 'smart_proxy_dynflow/process_manager'
 
 module Proxy::Dynflow
   module Runner
-    # A convenience module which should be included into a Runner action. It
-    # leverages {::Proxy::Dynflow::ProcessManager} to reliably keep track of
-    # an external process and collect its output.
-    #
-    # The only expectation from the Runner action is to call
-    # {#initialize_command} somewhere and pass the command to be run to it.
     module ProcessManagerCommand
+      # @rbs *command: String
+      #: (*String) -> void
       def initialize_command(*command)
-        @process_manager = ProcessManager.new(command)
+        @process_manager = ProcessManager.new(command) #: ProcessManager
         set_process_manager_callbacks(@process_manager)
         @process_manager.start!
         if @process_manager.done? && @process_manager.status == 255
@@ -22,6 +19,7 @@ module Proxy::Dynflow
         end
       end
 
+      #: (ProcessManager) -> void
       def set_process_manager_callbacks(pm) # rubocop:disable Naming/MethodParameterName
         pm.on_stdout do |data|
           publish_data(data, 'stdout')
@@ -33,11 +31,13 @@ module Proxy::Dynflow
         end
       end
 
+      #: () -> void
       def refresh
         @process_manager.process(timeout: 0.1) unless @process_manager.done?
         publish_exit_status(@process_manager.status) if @process_manager.done?
       end
 
+      #: () -> void
       def close
         @process_manager&.close
       end

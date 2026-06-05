@@ -1,7 +1,9 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 module Proxy::Dynflow::Action
   class OutputCollector < ::Proxy::Dynflow::Action::Runner
+    #: () -> void
     def init_run
       output[:result] = []
       output[:runner_id] = input[:runner_id]

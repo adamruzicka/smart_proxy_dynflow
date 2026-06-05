@@ -1,10 +1,11 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 require 'logging'
 
 module Proxy::Dynflow
   class Log
-    LOGGER_NAME = 'dynflow-core'
+    LOGGER_NAME = 'dynflow-core' #: String
 
     begin
       require 'syslog/logger'
@@ -13,20 +14,21 @@ module Proxy::Dynflow
       @syslog_available = false
     end
 
-    class << self
-      def reload!
-        Logging.logger[LOGGER_NAME].appenders.each(&:close)
-        Logging.logger[LOGGER_NAME].clear_appenders
-        @logger = nil
-        instance
-      end
+    #: () -> void
+    def self.reload!
+      Logging.logger[LOGGER_NAME].appenders.each(&:close)
+      Logging.logger[LOGGER_NAME].clear_appenders
+      @logger = nil
+      instance
+    end
 
-      def instance
-        ::Proxy::LogBuffer::Decorator.instance
-      end
+    #: () -> untyped
+    def self.instance
+      ::Proxy::LogBuffer::Decorator.instance
     end
 
     class ProxyStructuredFormater < ::Dynflow::LoggerAdapters::Formatters::Abstract
+      #: (untyped) -> String
       def format(message)
         if message.is_a?(Exception)
           subject = "#{message.message} (#{message.class})"
@@ -43,6 +45,7 @@ module Proxy::Dynflow
     end
 
     class ProxyAdapter < ::Dynflow::LoggerAdapters::Simple
+      #: (untyped, ?Integer, ?Array[untyped]) -> void
       def initialize(logger, level = Logger::DEBUG, _formatters = [])
         @logger           = logger
         @logger.level     = level

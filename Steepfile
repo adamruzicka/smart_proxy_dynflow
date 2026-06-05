@@ -1,5 +1,6 @@
 target :lib do
   signature "sig"
+  signature "sig/stubs"
 
   check "lib"
 

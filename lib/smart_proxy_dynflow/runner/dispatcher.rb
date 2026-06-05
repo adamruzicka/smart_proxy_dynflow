@@ -1,3 +1,4 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 require 'smart_proxy_dynflow/ticker'
@@ -5,6 +6,9 @@ require 'smart_proxy_dynflow/ticker'
 module Proxy::Dynflow
   module Runner
     class Dispatcher
+      # @rbs self.@instance: Dispatcher?
+
+      #: () -> Dispatcher?
       def self.instance
         return @instance if @instance
 
@@ -13,6 +17,16 @@ module Proxy::Dynflow
       end
 
       class RunnerActor < ::Dynflow::Actor
+        # @rbs @dispatcher: Dispatcher
+        # @rbs @clock: untyped
+        # @rbs @ticker: untyped
+        # @rbs @logger: untyped
+        # @rbs @suspended_action: untyped
+        # @rbs @runner: Runner::Base
+        # @rbs @finishing: bool
+        # @rbs @refresh_planned: bool
+
+        #: (Dispatcher, untyped, Runner::Base, untyped, untyped, ?Hash[untyped, untyped]) -> void
         def initialize(dispatcher, suspended_action, runner, clock, logger, _options = {})
           @dispatcher = dispatcher
           @clock = clock
@@ -23,12 +37,14 @@ module Proxy::Dynflow
           @finishing = false
         end
 
+        #: (*untyped) -> untyped
         def on_envelope(*args)
           super
         rescue => e
           handle_exception(e)
         end
 
+        #: () -> void
         def start_runner
           @logger.debug("start runner #{@runner.id}")
           set_timeout if @runner.timeout_interval
@@ -38,6 +54,7 @@ module Proxy::Dynflow
           plan_next_refresh
         end
 
+        #: () -> void
         def refresh_runner
           @logger.debug("refresh runner #{@runner.id}")
           dispatch_updates(@runner.run_refresh)
@@ -46,11 +63,13 @@ module Proxy::Dynflow
           plan_next_refresh
         end
 
+        #: () -> void
         def refresh_output
           @logger.debug("refresh output #{@runner.id}")
           dispatch_updates(@runner.run_refresh_output)
         end
 
+        #: (Hash[untyped, Runner::Update]) -> void
         def dispatch_updates(updates)
           updates.each { |receiver, update| (receiver || @suspended_action) << update }
 
@@ -60,6 +79,7 @@ module Proxy::Dynflow
           finish if main_process&.exit_status
         end
 
+        #: () -> void
         def timeout_runner
           @logger.debug("timeout runner #{@runner.id}")
           @runner.timeout
@@ -67,6 +87,7 @@ module Proxy::Dynflow
           handle_exception(e, false)
         end
 
+        #: () -> void
         def kill
           @logger.debug("kill runner #{@runner.id}")
           @runner.kill
@@ -74,12 +95,14 @@ module Proxy::Dynflow
           handle_exception(e, false)
         end
 
+        #: () -> void
         def finish
           @logger.debug("finish runner #{@runner.id}")
           @finishing = true
           @dispatcher.finish(@runner.id)
         end
 
+        #: (*untyped) -> void
         def start_termination(*args)
           @logger.debug("terminate #{@runner.id}")
           super
@@ -87,18 +110,21 @@ module Proxy::Dynflow
           finish_termination
         end
 
+        #: (Runner::ExternalEvent) -> void
         def external_event(event)
           dispatch_updates(@runner.external_event(event))
         end
 
         private
 
+        #: () -> void
         def set_timeout
           timeout_time = Time.now.getlocal + @runner.timeout_interval
           @logger.debug("setting timeout for #{@runner.id} to #{timeout_time}")
           @clock.ping(reference, timeout_time, :timeout_runner)
         end
 
+        #: () -> void
         def plan_next_refresh
           if !@finishing && !@refresh_planned
             @logger.debug("planning to refresh #{@runner.id}")
@@ -107,13 +133,21 @@ module Proxy::Dynflow
           end
         end
 
+        #: (Exception, ?bool) -> void
         def handle_exception(exception, fatal = true)
           @dispatcher.handle_command_exception(@runner.id, exception, fatal)
         end
       end
 
-      attr_reader :ticker
+      attr_reader :ticker #: untyped
 
+      # @rbs @mutex: Mutex
+      # @rbs @clock: untyped
+      # @rbs @logger: untyped
+      # @rbs @runner_actors: Hash[String, untyped]
+      # @rbs @runner_suspended_actions: Hash[String, untyped]
+
+      #: (untyped, untyped) -> void
       def initialize(clock, logger)
         @mutex  = Mutex.new
         @clock  = clock
@@ -123,10 +157,12 @@ module Proxy::Dynflow
         @runner_suspended_actions = {}
       end
 
+      #: () { () -> untyped } -> untyped
       def synchronize(&block)
         @mutex.synchronize(&block)
       end
 
+      #: (untyped, Runner::Base) -> String?
       def start(suspended_action, runner)
         synchronize do
           raise "Actor with runner id #{runner.id} already exists" if @runner_actors[runner.id]
@@ -143,6 +179,7 @@ module Proxy::Dynflow
         end
       end
 
+      #: (String) -> void
       def kill(runner_id)
         synchronize do
           runner_actor = @runner_actors[runner_id]
@@ -152,6 +189,7 @@ module Proxy::Dynflow
         end
       end
 
+      #: (String) -> void
       def finish(runner_id)
         synchronize do
           _finish(runner_id)
@@ -160,6 +198,7 @@ module Proxy::Dynflow
         end
       end
 
+      #: (String, Runner::ExternalEvent) -> void
       def external_event(runner_id, external_event)
         synchronize do
           runner_actor = @runner_actors[runner_id]
@@ -167,22 +206,26 @@ module Proxy::Dynflow
         end
       end
 
+      #: (String) -> void
       def refresh_output(runner_id)
         synchronize do
           @runner_actors[runner_id]&.tell([:refresh_output])
         end
       end
 
+      #: (*untyped) -> void
       def handle_command_exception(*args)
         synchronize { _handle_command_exception(*args) }
       end
 
+      #: () -> Integer
       def refresh_interval
         1
       end
 
       private
 
+      #: (String) -> void
       def _finish(runner_id)
         runner_actor = @runner_actors.delete(runner_id)
         return unless runner_actor
@@ -194,6 +237,7 @@ module Proxy::Dynflow
         @runner_suspended_actions.delete(runner_id)
       end
 
+      #: (String, Exception, ?bool) -> void
       def _handle_command_exception(runner_id, exception, fatal = true)
         @logger.error("error while dispatching request to runner #{runner_id}:"\
                       "#{exception.class} #{exception.message}:\n #{exception.backtrace.join("\n")}")

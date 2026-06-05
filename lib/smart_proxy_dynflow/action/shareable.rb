@@ -1,7 +1,9 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 module Proxy::Dynflow::Action
   class Shareable < ::Dynflow::Action
+    #: (Hash[String | Symbol, untyped]) -> untyped
     def plan(input)
       input = input.dup
       callback = input.delete('callback')
@@ -20,6 +22,7 @@ module Proxy::Dynflow::Action
 
     private
 
+    #: () -> bool
     def on_proxy?
       true
     end

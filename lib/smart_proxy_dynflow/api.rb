@@ -1,3 +1,4 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 require 'sinatra/base'
@@ -81,16 +82,19 @@ module Proxy
 
       private
 
+      #: (Hash[String, untyped], untyped) -> String
       def callback_host(params, request)
         params.fetch('action_input', {})['proxy_url'] || callback_host_from_env(request)
       end
 
+      #: (untyped) -> String
       def callback_host_from_env(request)
         protocol = %w[yes on 1].include?(request.env['HTTPS'].to_s) ? 'https' : 'http'
         host = request.env.values_at('HTTP_X_FORWARDED_FOR', 'HTTP_HOST').compact.first
         "#{protocol}://#{host}"
       end
 
+      #: (Hash[String, untyped]) -> Class
       def launcher_class(params)
         operation = params.fetch('operation')
         if TaskLauncherRegistry.key?(operation)

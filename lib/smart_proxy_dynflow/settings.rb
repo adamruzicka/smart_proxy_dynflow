@@ -1,9 +1,9 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
-
-# require 'ostruct'
 
 module Proxy::Dynflow
   class Settings
+    #: () -> untyped
     def self.instance
       Proxy::Dynflow::Plugin.settings
     end

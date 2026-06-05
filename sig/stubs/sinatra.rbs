@@ -1,0 +1,10 @@
+# Minimal stubs for Sinatra types
+module Sinatra
+  class Base
+  end
+
+  module Authorization
+    module Helpers
+    end
+  end
+end

@@ -1,33 +1,37 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 module Proxy::Dynflow
   class TaskLauncherRegistry
-    class << self
-      def register(name, launcher)
-        registry[name] = launcher
-      end
+    # @rbs self.@registry: Hash[String, Class]
 
-      def fetch(name, default = nil)
-        if default.nil?
-          registry.fetch(name)
-        else
-          registry.fetch(name, default)
-        end
-      end
+    #: (String, Class) -> void
+    def self.register(name, launcher)
+      registry[name] = launcher
+    end
 
-      def key?(name)
-        registry.key?(name)
+    #: (String, ?Class?) -> Class
+    def self.fetch(name, default = nil)
+      if default.nil?
+        registry.fetch(name)
+      else
+        registry.fetch(name, default)
       end
+    end
 
-      def operations
-        registry.keys
-      end
+    #: (String) -> bool
+    def self.key?(name)
+      registry.key?(name)
+    end
 
-      private
+    #: () -> Array[String]
+    def self.operations
+      registry.keys
+    end
 
-      def registry
-        @registry ||= {}
-      end
+    #: () -> Hash[String, Class]
+    private_class_method def self.registry
+      @registry ||= {}
     end
   end
 end

@@ -1,11 +1,18 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 require 'dynflow'
 
 module Proxy::Dynflow
   class Ticker < ::Dynflow::Actor
-    attr_reader :clock
+    attr_reader :clock #: untyped
 
+    # @rbs @logger: untyped
+    # @rbs @events: Array[[untyped, untyped]]
+    # @rbs @refresh_interval: Numeric
+    # @rbs @planned: bool
+
+    #: (untyped, untyped, Numeric) -> void
     def initialize(clock, logger, refresh_interval)
       @clock = clock
       @logger = logger
@@ -14,6 +21,7 @@ module Proxy::Dynflow
       plan_next_tick
     end
 
+    #: () -> void
     def tick
       @logger.debug("Ticker ticking for #{@events.size} events")
       @events.each do |(target, args)|
@@ -25,6 +33,7 @@ module Proxy::Dynflow
       plan_next_tick
     end
 
+    #: (untyped, untyped) -> void
     def add_event(target, args)
       @events << [target, args]
       plan_next_tick
@@ -32,6 +41,7 @@ module Proxy::Dynflow
 
     private
 
+    #: (untyped, untyped) -> void
     def pass_event(target, args)
       target.tell(args)
     rescue => e
@@ -39,6 +49,7 @@ module Proxy::Dynflow
       @logger.error(e)
     end
 
+    #: () -> void
     def plan_next_tick
       if !@planned && !@events.empty?
         @clock.ping(reference, Time.now.getlocal + @refresh_interval, :tick)

@@ -1,11 +1,14 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 require 'fileutils'
 
 module Proxy::Dynflow
   class Core
-    attr_accessor :world, :accepted_cert_serial
+    attr_accessor :world #: untyped
+    attr_accessor :accepted_cert_serial #: Integer?
 
+    #: () -> void
     def initialize
       @world = create_world
       cert_file = Proxy::SETTINGS.foreman_ssl_cert || Proxy::SETTINGS.ssl_certificate
@@ -17,6 +20,7 @@ module Proxy::Dynflow
       end
     end
 
+    #: () -> untyped
     def create_world(&block)
       config = default_world_config(&block)
       world = ::Dynflow::World.new(config)
@@ -24,8 +28,9 @@ module Proxy::Dynflow
       world
     end
 
+    #: () -> String
     def persistence_conn_string
-      return ENV['DYNFLOW_DB_CONN_STRING'] if ENV.key? 'DYNFLOW_DB_CONN_STRING'
+      return ENV.fetch('DYNFLOW_DB_CONN_STRING') if ENV.key? 'DYNFLOW_DB_CONN_STRING'
 
       db_conn_string = 'sqlite:/'
 
@@ -41,10 +46,12 @@ module Proxy::Dynflow
       db_conn_string
     end
 
+    #: () -> untyped
     def persistence_adapter
       ::Dynflow::PersistenceAdapters::Sequel.new persistence_conn_string
     end
 
+    #: () -> untyped
     def default_world_config
       ::Dynflow::Config.new.tap do |config|
         config.auto_rescue = true
@@ -58,10 +65,12 @@ module Proxy::Dynflow
       end
     end
 
+    #: () -> untyped
     def logger_adapter
       Log::ProxyAdapter.new(Proxy::LogBuffer::Decorator.instance, Log.instance.level)
     end
 
+    #: () -> Proc
     def execution_plan_cleaner
       proc do |world|
         age = Settings.instance.execution_plan_cleaner_age
@@ -70,58 +79,70 @@ module Proxy::Dynflow
       end
     end
 
-    class << self
-      attr_reader :instance
+    # @rbs self.@instance: Core?
+    # @rbs self.@matchers: Array[untyped]
+    # @rbs self.@after_initialize_blocks: Array[^(Core) -> void]
 
-      def ensure_initialized
-        return @instance if @instance
+    #: () -> Core?
+    def self.instance
+      @instance
+    end
 
-        @instance = Core.new
-        after_initialize_blocks.each { |block| block.call(@instance) }
-        @instance
-      end
+    #: () -> Core
+    def self.ensure_initialized
+      existing = @instance
+      return existing if existing
 
-      def silencer_matchers
-        @matchers ||= [::Dynflow::DeadLetterSilencer::Matcher.new(Ticker)]
-      end
+      instance = Core.new
+      after_initialize_blocks.each { |block| block.call(instance) }
+      @instance = instance
+    end
 
-      def register_silencer_matchers(matchers)
-        silencer_matchers.concat matchers
-      end
+    #: () -> Array[untyped]
+    def self.silencer_matchers
+      @matchers ||= [::Dynflow::DeadLetterSilencer::Matcher.new(Ticker)]
+    end
 
-      def web_console
-        require 'dynflow/web'
-        ::Dynflow::Web.setup do
-          # we can't use the proxy's after_activation hook, as
-          # it happens before the Daemon forks the process (including
-          # closing opened file descriptors)
-          # TODO: extend smart proxy to enable hooks that happen after
-          # the forking
-          helpers Helpers
-          include ::Sinatra::Authorization::Helpers
+    #: (Array[untyped]) -> void
+    def self.register_silencer_matchers(matchers)
+      silencer_matchers.concat matchers
+    end
 
-          before do
-            do_authorize_with_ssl_client if Settings.instance.console_auth
-          end
+    #: () -> untyped
+    def self.web_console
+      require 'dynflow/web'
+      ::Dynflow::Web.setup do
+        # we can't use the proxy's after_activation hook, as
+        # it happens before the Daemon forks the process (including
+        # closing opened file descriptors)
+        # TODO: extend smart proxy to enable hooks that happen after
+        # the forking
+        helpers Helpers
+        include ::Sinatra::Authorization::Helpers
 
-          Core.ensure_initialized
-          set :world, Core.world
+        before do
+          do_authorize_with_ssl_client if Settings.instance.console_auth
         end
-      end
 
-      def world
-        instance.world
-      end
-
-      def after_initialize(&block)
-        after_initialize_blocks << block
-      end
-
-      private
-
-      def after_initialize_blocks
-        @after_initialize_blocks ||= []
+        Core.ensure_initialized
+        set :world, Core.world
       end
     end
+
+    #: () -> untyped
+    def self.world
+      instance.world
+    end
+
+    #: () { (Core) -> void } -> void
+    def self.after_initialize(&block)
+      after_initialize_blocks << block
+    end
+
+    #: () -> Array[^(Core) -> void]
+    def self.after_initialize_blocks
+      @after_initialize_blocks ||= []
+    end
+    private_class_method :after_initialize_blocks
   end
 end

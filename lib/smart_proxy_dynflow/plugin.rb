@@ -1,3 +1,4 @@
+# rbs_inline: enabled
 # frozen_string_literal: true
 
 require 'proxy/log'
@@ -30,6 +31,7 @@ module Proxy::Dynflow
       Proxy::Dynflow::Core.ensure_initialized
     end
 
+    #: () -> Array[String]
     def self.available_operations
       TaskLauncherRegistry.operations
     end
